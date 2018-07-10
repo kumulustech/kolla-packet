@@ -2,13 +2,10 @@
 
 As with any installation, there are certain pre-requisites that need to be in place.  For simple "devstack" like usage, we can pull our images from the Hub.docker.io registry, and simply leverage/extend the default kolla driven ansible inventory to manage deployment.
 
-The following lab is based on the ktos-050 branch of the kolla-bash project:
+The following lab is based on the kolla-packet project:
 
-https://github.com/kumulustech/kolla-bash
-
-0) git clone this repository and select the ktos-050 branch
-
-    git clone https://github.com/kumulustech/kolla-bash -b ktos-050
+    git clone https://github.com/kumulustech/kolla-packet
+    cd kolla-packet
 
 1) if you're going to use bare metal servers, install Ubuntu, and either add their IP addresses to DNS, or update the default inventory file with their IP addresses.
 
