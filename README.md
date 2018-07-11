@@ -14,7 +14,7 @@ If you are using an automated infrastructure, specifically packet.net for comput
 2) If you're going to use packet.net as your target, get a packet project ID and create (or capture) your via the app.packet.net site.
 3) Create a "packet_auth.api" file (it can be any name), and in it create a line like (replacing the packet-auth-token-from... string with the token you grabbed from app.packet.net and the project id with the project id from the URL or the project info page)
 
-    PACKET_TOKEN=packet-auth-token-from-app-packet-net
+    PACKET_API_TOKEN=packet-auth-token-from-app-packet-net
     PACKET_PROJECT=packet-project-from-app-packet-net
 
 Then source that file:
@@ -39,7 +39,7 @@ And source your packet.api file as well to have the right environment variables.
 
 5) If you have a DNSimple account, and want to use the full current script, get an API token, and your DNSimple account ID and add them as "DNSIMPLE_TOKEN" and "DNSIMPLE_ACCOUNT" to your packet.api file:
 
-    PACKET_TOKEN=packet-auth-token-from-app-packet-net
+    PACKET_API_TOKEN=packet-auth-token-from-app-packet-net
     PACKET_PROJECT=packet-project-from-app-packet-net
     DNSIMPLE_TOKEN=dnsimple-api-token
     DNSIMPLE_ACCOUNT=dnsimple-account-id
