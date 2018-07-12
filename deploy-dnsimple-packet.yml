@@ -5,7 +5,7 @@
   vars:
     build: present
   tasks:
-  - name: create or disciver packet devices
+  - name: create or discover packet devices
     packet_device:
       project_id: "{{project_id}}"
       hostnames: [control,compute1,compute2]
