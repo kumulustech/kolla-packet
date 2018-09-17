@@ -12,14 +12,14 @@ The following lab is based on the kolla-packet project:
 If you are using an automated infrastructure, specifically packet.net for compute and dnsimple.com as a managed DNS service, you can use the packet-deploy.yml Ansible playbook. If not, you may be able to do a similar deployment with a tool like terraform or even write your own ansible to launch your infastructure.
 
 2) If you're going to use packet.net as your target, get a packet project ID and create (or capture) your via the app.packet.net site.
-3) Create a "packet_auth.api" file (it can be any name), and in it create a line like (replacing the packet-auth-token-from... string with the token you grabbed from app.packet.net and the project id with the project id from the URL or the project info page)
+3) Create a "~/dev/packet.api" file (it can be any name), and in it create a line like (replacing the packet-auth-token-from... string with the token you grabbed from app.packet.net and the project id with the project id from the URL or the project info page)
 
     PACKET_API_TOKEN=packet-auth-token-from-app-packet-net
     PACKET_PROJECT=packet-project-from-app-packet-net
 
 Then source that file:
 
-    source packet_auth.api
+    source ~/dev/packet.api
 
 3) We also need the packet service, and ansible available to us, so create a virtual environment (or spin up a container) and install the parameters.
 
@@ -35,7 +35,7 @@ Then source that file:
 
 And source your packet.api file as well to have the right environment variables.
 
-     . packet.api
+     . ~/dev/packet.api
 
 5) If you have a DNSimple account, and want to use the full current script, get an API token, and your DNSimple account ID and add them as "DNSIMPLE_TOKEN" and "DNSIMPLE_ACCOUNT" to your packet.api file:
 
@@ -46,7 +46,7 @@ And source your packet.api file as well to have the right environment variables.
 
 Source the packet.api file again:
 
-    . packet.API
+    . ~/dev/packet.api
 
 6) Finally we can launch, either with DNSimple to set the DNS parameters:
 
@@ -66,5 +66,7 @@ Finally, we can configure our nodes with the prerequisites to deploy Kolla/opens
 
     ansible-playbook -i inventory initialize.yml
 
+When this is complete, you should have a running OpenStack service.  The control node will have a /root/open.rc resource file, and the default admin password for the "admin" user will be This!5@Password unless you set it to be different in the initialize.yml script.
+
 ## Network config
-Because this was intended for setting up little test environments, the network config is fairly simplistic, including the scripted creation of a basic tenant/router/floating IP network.  The "public" services are associated with a linux bridge "external" bridge (br-ex), and an additional interface can readily be added if one is available for proper resource sharing.  In which case it would be sensible to look at the IP range set on the bridge (which allows controller access to the "external" network), along with the setup_network.sh script that configures the network and floating pool.
+Because this was intended for setting up little test environments, the network config is fairly simplistic, including the scripted creation of a basic tenant/router/floating IP network.  The "public" services are associated with a linux bridge "external" bridge (ext), and an additional interface can readily be added if one is available for proper resource sharing.  In which case it would be sensible to look at the IP range set on the bridge (which allows controller access to the "external" network), along with the setup_network.sh script that configures the network and floating pool.

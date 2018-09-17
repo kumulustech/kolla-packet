@@ -1,7 +1,7 @@
 [all]
-compute2  ansible_ssh_host=147.75.70.225
-compute1  ansible_ssh_host=147.75.70.215
-control  ansible_ssh_host=147.75.88.197
+compute2  ansible_ssh_host=147.75.91.127
+compute1  ansible_ssh_host=147.75.91.125
+control  ansible_ssh_host=147.75.108.179
 
 [control]
 control

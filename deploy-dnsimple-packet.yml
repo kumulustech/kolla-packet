@@ -7,7 +7,8 @@
   tasks:
   - name: create or discover packet devices
     packet_device:
-      project_id: "{{project_id}}"
+      auth_token: "{{ lookup('env','PACKET_AUTH_TOKEN') }}"
+      project_id: "{{ lookup('env','PACKET_PROJECT') }}"
       hostnames: [control,compute1,compute2]
       operating_system: ubuntu_16_04
       plan: baremetal_0
@@ -30,7 +31,7 @@
       name: "{{item.hostname}}"
       content: "{{item.public_ipv4}}"
       domain: "cloudsushi.io"
-      dnsimple_token: "{{dnsimple_token}}"
-      dnsimple_account: "{{dnsimple_account}}"
+      dnsimple_token: "{{ lookup('env','DNSIMPLE_TOKEN') }}"
+      dnsimple_account: "{{ lookup('env','DNSIMPLE_ACCOUNT') }}"
       state: "{{build}}"
     with_items: "{{packet_info['devices']}}"

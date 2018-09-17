@@ -45,13 +45,7 @@
 
   - name: upload multinode template
     template: src=templates/multinode.j2 dest=/root/multinode
-
-  - name: copy debian-network.sh script to host
-    copy:
-      src: debian-network.sh
-      dest: /root/debian-network.sh
-      mode: 0755
-  
+ 
   - name: Pass options to dpkg on run
     apt:
       upgrade: dist
@@ -67,8 +61,6 @@
      - htop
      - python-dev
      - python-netaddr
-#     - python-openstackclient
- #    - python-neutronclient
      - libffi-dev
      - libssl-dev
      - gcc
@@ -123,29 +115,17 @@
   
   - name: generate passwords
     command: kolla-genpwd
-
-  - name: create debian config from script
-    script: debian-network.sh
-    register: debian_config
-    args:
-      creates: /etc/kolla/globals.yml
-  - name: create dummy interface
-    command: modprobe dummy
-  - name: create dummy interface ext
-    command: ip link set name ext dev dummy0 creates=/etc/modprobe.d/dummy.conf
-  - name: ensure dummy on reboot
+  
+  - name: set default admin password
     lineinfile:
-      line: install dummy /sbin/modprobe --ignore-install dummy; /sbin/ip link set name ext dev dummy0
-      path: /etc/modprobe.d/dummy.conf
-      create: yes
-  - name: make interface ext permanent
-    blockinfile:
-      path: /etc/network/interfaces
-      block: |
-        iface ext inet manual 
-          pre-up ip link set name ext dev dummy0
-          up ip link set dev ext up
-          post-down ip link del dev dummy0
+      dest: /etc/kolla/passwords.yml
+      regexp: '^keystone_admin_password:.*'
+      line: 'keystone_admin_password: This!5@Password'
+ 
+  - name: create globals.yml from template
+    template:
+      src: templates/globals.j2
+      dest: /etc/kolla/globals.yml
 
   - name: add nested VM support to the kernel
     lineinfile:
@@ -156,9 +136,52 @@
   - name: reset kvm module
     shell:  modprobe -r kvm && modprobe kvm
     ignore_errors: true
+  - name: ensure localtime is a link
+    file:
+     src: /etc/timezone
+     dest: /etc/localtime
+     state: link
+     force: yes
 
-#  - name: label devices
-#    include: labels.yml
+- hosts: control[0]
+  become: true
+  become_user: root
+  tasks:
+
+  - name: create dummy interface
+    command: modprobe dummy
+  - name: create dummy interface ext
+    command: ip link set name ext dev dummy0 creates=/etc/modprobe.d/dummy.conf
+  - name: ensure dummy on reboot
+    lineinfile:
+      line: install dummy /sbin/modprobe --ignore-install dummy; /sbin/ip link set name ext dev dummy0
+      path: /etc/modprobe.d/dummy.conf
+      create: yes
+
+  - name: create ip range allocation and assign to controller
+    packet_ip:
+      auth_token: "{{ lookup('env','PACKET_AUTH_TOKEN') }}"
+      project_id: "{{ lookup('env','PACKET_PROJECT_ID') }}"
+      facility: "sjc1"
+      quantity: "8"
+      hostname: "control"
+      state: "present"
+    register: packet_ip
+  
+  - name: expose public network information
+    debug:
+      var: packet_ip
+  - name: make interface ext permanent
+    blockinfile:
+      path: /etc/network/interfaces
+      block: |
+        auto ext
+        iface ext inet static
+          address {{packet_ip.addr_address}}/{{packet_ip.addr_cidr}}
+          gateway {{packet_ip.addr_gateway}}
+          pre-up ip link add ext type dummy
+          up ip link set dev ext up
+          post-down ip link del ext
 
 - hosts: control[0]
   become: true
@@ -166,15 +189,12 @@
   tasks:
   - name: install host bootstrap requirements
     command: kolla-ansible -i multinode bootstrap-servers
-#  - name: launch openstack with kolla
-#    command: kolla-ansible -i multinode deploy
-#    register: deploy_multinode
-#    ignore_errors: true
+
+  - name: launch openstack with kolla
+    command: kolla-ansible -i multinode deploy
 
   - name: run post-install config
     command: ./post-install.sh
-#    register: post_install
-#    when: deploy_multinode.rc == 0
-#    ignore_errors: true
-#  - name: enable masquerade (NAT) on external interface
-#    include: tasks/masq.yml
+
+  - name: enable masquerade (NAT) on external interface
+    include: tasks/masq.yml

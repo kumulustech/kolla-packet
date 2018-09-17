@@ -18,10 +18,6 @@ source ~/open.rc
 
 tenant=`openstack project list -f csv --quote none --insecure | grep admin | cut -d, -f1`
 
-public_network=${1:-53.255.81}
-#ip a a ${public_network}.1/24 dev br-ex
-#ip l s br-ex up
-
 openstack network create public --project admin --external --provider-network-type flat --provider-physical-network physnet1 --share --default --insecure
 #if segmented network{vlan,vxlan,gre}: --provider:segmentation_id ${segment_id}
 openstack subnet create public --subnet-range 147.75.89.128/27 --project admin --gateway 147.75.89.129 --allocation-pool start=147.75.89.130,end=147.75.89.158 --no-dhcp --network public --insecure

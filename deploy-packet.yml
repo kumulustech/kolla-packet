@@ -7,7 +7,8 @@
   tasks:
   - name: create or discover packet devices
     packet_device:
-      project_id: "{{project_id}}"
+      auth_token: "{{ lookup('env','PACKET_AUTH_TOKEN') }}"
+      project_id: "{{ lookup('env','PACKET_PROJECT') }}"
       hostnames: [control,compute1,compute2]
       operating_system: ubuntu_16_04
       plan: baremetal_0
